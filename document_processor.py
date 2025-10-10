@@ -1,5 +1,5 @@
 """
-Модуль для обработки документов и создания чанков
+Module for document processing and chunking
 """
 from typing import List, Dict, Any, Tuple
 import re
@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class DocumentProcessor:
-    """Класс для обработки документов и создания чанков"""
+    """Class for document processing and chunking"""
     
     def __init__(self, chunk_size: int = 1000, chunk_overlap: int = 200):
         self.chunk_size = chunk_size
@@ -24,11 +24,11 @@ class DocumentProcessor:
     
     def process_paper(self, paper: Dict[str, Any]) -> List[Document]:
         """
-        Обрабатывает одну статью и создает чанки
+        Processes a single paper and creates chunks
         """
         documents = []
         
-        # Создаем базовую информацию о документе
+        # Create basic document information
         metadata = {
             "paper_id": paper["id"],
             "title": paper["title"],
@@ -39,12 +39,12 @@ class DocumentProcessor:
             "updated": paper["updated"]
         }
         
-        # Обрабатываем каждую секцию
+        # Process each section
         for section_idx, section in enumerate(paper["sections"]):
             section_metadata = metadata.copy()
             section_metadata["section_id"] = section_idx
             
-            # Обрабатываем текст секции
+            # Process section text
             if section["text"]:
                 text_chunks = self._process_text_section(
                     section["text"], 
@@ -53,7 +53,7 @@ class DocumentProcessor:
                 )
                 documents.extend(text_chunks)
             
-            # Обрабатываем таблицы
+            # Process tables
             if section["tables"]:
                 table_chunks = self._process_tables(
                     section["tables"],
@@ -62,7 +62,7 @@ class DocumentProcessor:
                 )
                 documents.extend(table_chunks)
             
-            # Обрабатываем изображения
+            # Process images
             if section["images"]:
                 image_chunks = self._process_images(
                     section["images"],
@@ -74,11 +74,11 @@ class DocumentProcessor:
         return documents
     
     def _process_text_section(self, text: str, metadata: Dict, section_idx: int) -> List[Document]:
-        """Обрабатывает текстовую секцию"""
+        """Processes text section"""
         if not text.strip():
             return []
         
-        # Разбиваем текст на чанки
+        # Split text into chunks
         chunks = self.text_splitter.split_text(text)
         
         documents = []
@@ -98,15 +98,15 @@ class DocumentProcessor:
         return documents
     
     def _process_tables(self, tables: Dict[str, str], metadata: Dict, section_idx: int) -> List[Document]:
-        """Обрабатывает таблицы"""
+        """Processes tables"""
         documents = []
         
         for table_id, table_content in tables.items():
             if not table_content.strip():
                 continue
             
-            # Создаем описание таблицы
-            table_text = f"Таблица {table_id}:\n{table_content}"
+            # Create table description
+            table_text = f"Table {table_id}:\n{table_content}"
             
             chunk_metadata = metadata.copy()
             chunk_metadata.update({
@@ -123,22 +123,22 @@ class DocumentProcessor:
         return documents
     
     def _process_images(self, images: Dict[str, str], metadata: Dict, section_idx: int) -> List[Document]:
-        """Обрабатывает изображения"""
+        """Processes images"""
         documents = []
         
         for image_id, image_content in images.items():
             if not image_content.strip():
                 continue
             
-            # Создаем описание изображения
-            image_text = f"Изображение {image_id}: [Изображение в формате base64]"
+            # Create image description
+            image_text = f"Image {image_id}: [Image in base64 format]"
             
             chunk_metadata = metadata.copy()
             chunk_metadata.update({
                 "content_type": "image",
                 "image_id": image_id,
                 "chunk_id": f"{metadata['paper_id']}_section_{section_idx}_image_{image_id}",
-                "image_base64": image_content  # Сохраняем base64 для дальнейшего использования
+                "image_base64": image_content  # Save base64 for further use
             })
             
             documents.append(Document(
@@ -150,7 +150,7 @@ class DocumentProcessor:
     
     def process_corpus(self, papers: List[Dict[str, Any]]) -> List[Document]:
         """
-        Обрабатывает весь корпус документов
+        Processes entire document corpus
         """
         all_documents = []
         
@@ -158,16 +158,16 @@ class DocumentProcessor:
             try:
                 paper_documents = self.process_paper(paper)
                 all_documents.extend(paper_documents)
-                logger.info(f"Обработана статья {paper['id']}: {len(paper_documents)} чанков")
+                logger.info(f"Processed paper {paper['id']}: {len(paper_documents)} chunks")
             except Exception as e:
-                logger.error(f"Ошибка при обработке статьи {paper.get('id', 'unknown')}: {e}")
+                logger.error(f"Error processing paper {paper.get('id', 'unknown')}: {e}")
         
-        logger.info(f"Всего создано {len(all_documents)} чанков из {len(papers)} статей")
+        logger.info(f"Total created {len(all_documents)} chunks from {len(papers)} papers")
         return all_documents
     
     def get_document_stats(self, documents: List[Document]) -> Dict[str, Any]:
         """
-        Возвращает статистику по документам
+        Returns document statistics
         """
         stats = {
             "total_chunks": len(documents),

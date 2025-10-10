@@ -1,5 +1,5 @@
 """
-Основной класс RAG-системы
+Main RAG system class
 """
 import os
 from typing import List, Dict, Any, Optional
@@ -18,12 +18,12 @@ from vector_store import VectorStore
 logger = logging.getLogger(__name__)
 
 class RAGSystem:
-    """Основной класс RAG-системы"""
+    """Main RAG system class"""
     
     def __init__(self, config: Config = None):
         self.config = config or Config()
         
-        # Инициализируем компоненты
+        # Initialize components
         self.data_loader = OpenRAGDataLoader(self.config.DATA_DIR)
         self.document_processor = DocumentProcessor(
             chunk_size=self.config.CHUNK_SIZE,
@@ -35,7 +35,7 @@ class RAGSystem:
             embedding_model=self.config.EMBEDDING_MODEL
         )
         
-        # Инициализируем языковую модель
+        # Initialize language model
         if self.config.OPENAI_API_KEY:
             self.llm = ChatOpenAI(
                 model=self.config.LLM_MODEL,
@@ -43,91 +43,91 @@ class RAGSystem:
                 temperature=0.1
             )
         else:
-            logger.warning("OpenAI API ключ не найден. Используйте локальную модель.")
+            logger.warning("OpenAI API key not found. Use local model.")
             self.llm = None
         
-        # Создаем промпт для генерации ответов
+        # Create prompt template for answer generation
         self.prompt_template = self._create_prompt_template()
     
     def _create_prompt_template(self) -> ChatPromptTemplate:
-        """Создает шаблон промпта для генерации ответов"""
-        template = """Ты - помощник по научным статьям. Используй предоставленный контекст для ответа на вопрос.
+        """Creates prompt template for answer generation"""
+        template = """You are a scientific paper assistant. Use the provided context to answer the question.
 
-Контекст:
+Context:
 {context}
 
-Вопрос: {question}
+Question: {question}
 
-Инструкции:
-1. Отвечай на русском языке
-2. Используй только информацию из предоставленного контекста
-3. Если в контексте нет ответа на вопрос, скажи об этом
-4. Структурируй ответ четко и понятно
-5. При необходимости ссылайся на конкретные части контекста
+Instructions:
+1. Answer in English
+2. Use only information from the provided context
+3. If there is no answer in the context, say so
+4. Structure the answer clearly and understandably
+5. Reference specific parts of the context when necessary
 
-Ответ:"""
+Answer:"""
         
         return ChatPromptTemplate.from_template(template)
     
     def initialize_system(self, download_data: bool = False) -> None:
         """
-        Инициализирует RAG-систему
+        Initializes RAG system
         """
-        logger.info("Инициализация RAG-системы...")
+        logger.info("Initializing RAG system...")
         
-        # Загружаем данные
+        # Load data
         if download_data:
             self.data_loader.download_dataset()
         
-        # Загружаем корпус документов
+        # Load document corpus
         papers = self.data_loader.load_corpus()
         
         if not papers:
-            logger.warning("Корпус документов пуст")
+            logger.warning("Document corpus is empty")
             return
         
-        # Обрабатываем документы
+        # Process documents
         documents = self.document_processor.process_corpus(papers)
         
         if not documents:
-            logger.warning("Не удалось создать документы")
+            logger.warning("Failed to create documents")
             return
         
-        # Добавляем документы в векторное хранилище
+        # Add documents to vector storage
         self.vector_store.add_documents(documents)
         
-        # Выводим статистику
+        # Output statistics
         stats = self.document_processor.get_document_stats(documents)
         collection_info = self.vector_store.get_collection_info()
         
-        logger.info(f"RAG-система инициализирована:")
-        logger.info(f"- Обработано статей: {stats['papers_count']}")
-        logger.info(f"- Создано чанков: {stats['total_chunks']}")
-        logger.info(f"- Типы контента: {stats['content_types']}")
-        logger.info(f"- Документов в векторной БД: {collection_info.get('document_count', 0)}")
+        logger.info(f"RAG system initialized:")
+        logger.info(f"- Processed papers: {stats['papers_count']}")
+        logger.info(f"- Created chunks: {stats['total_chunks']}")
+        logger.info(f"- Content types: {stats['content_types']}")
+        logger.info(f"- Documents in vector DB: {collection_info.get('document_count', 0)}")
     
     def search_documents(self, 
                         query: str, 
                         n_results: int = None,
                         content_type: Optional[str] = None) -> List[Dict[str, Any]]:
         """
-        Выполняет поиск релевантных документов
+        Performs search for relevant documents
         """
         n_results = n_results or self.config.TOP_K_RESULTS
         
-        # Подготавливаем фильтры
+        # Prepare filters
         where_filter = None
         if content_type:
             where_filter = {"content_type": content_type}
         
-        # Выполняем поиск
+        # Perform search
         results = self.vector_store.search(
             query=query,
             n_results=n_results,
             where=where_filter
         )
         
-        logger.info(f"Найдено {len(results)} релевантных документов для запроса: '{query}'")
+        logger.info(f"Found {len(results)} relevant documents for query: '{query}'")
         return results
     
     def generate_answer(self, 
@@ -135,31 +135,31 @@ class RAGSystem:
                        context_documents: List[Dict[str, Any]] = None,
                        n_results: int = None) -> Dict[str, Any]:
         """
-        Генерирует ответ на основе запроса и контекста
+        Generates answer based on query and context
         """
         if not self.llm:
             return {
-                "answer": "Языковая модель не настроена. Пожалуйста, настройте OpenAI API ключ.",
+                "answer": "Language model not configured. Please set up OpenAI API key.",
                 "context": [],
                 "error": "LLM not configured"
             }
         
-        # Получаем контекстные документы
+        # Get context documents
         if context_documents is None:
             context_documents = self.search_documents(query, n_results)
         
         if not context_documents:
             return {
-                "answer": "Не найдено релевантных документов для ответа на ваш вопрос.",
+                "answer": "No relevant documents found to answer your question.",
                 "context": [],
                 "error": "No relevant documents found"
             }
         
-        # Формируем контекст
+        # Format context
         context = self._format_context(context_documents)
         
         try:
-            # Создаем цепочку для генерации ответа
+            # Create chain for answer generation
             chain = (
                 {"context": RunnablePassthrough(), "question": RunnablePassthrough()}
                 | self.prompt_template
@@ -167,7 +167,7 @@ class RAGSystem:
                 | StrOutputParser()
             )
             
-            # Генерируем ответ
+            # Generate answer
             answer = chain.invoke({"context": context, "question": query})
             
             return {
@@ -178,16 +178,16 @@ class RAGSystem:
             }
             
         except Exception as e:
-            logger.error(f"Ошибка при генерации ответа: {e}")
+            logger.error(f"Error generating answer: {e}")
             return {
-                "answer": f"Произошла ошибка при генерации ответа: {str(e)}",
+                "answer": f"An error occurred while generating answer: {str(e)}",
                 "context": context_documents,
                 "error": str(e)
             }
     
     def _format_context(self, documents: List[Dict[str, Any]]) -> str:
         """
-        Форматирует контекстные документы для промпта
+        Formats context documents for prompt
         """
         context_parts = []
         
@@ -195,16 +195,16 @@ class RAGSystem:
             content = doc['content']
             metadata = doc['metadata']
             
-            # Добавляем метаданные о документе
-            paper_title = metadata.get('title', 'Неизвестная статья')
+            # Add document metadata
+            paper_title = metadata.get('title', 'Unknown paper')
             section_id = metadata.get('section_id', 'N/A')
             content_type = metadata.get('content_type', 'text')
             
-            context_part = f"[Документ {i}]\n"
-            context_part += f"Статья: {paper_title}\n"
-            context_part += f"Секция: {section_id}\n"
-            context_part += f"Тип контента: {content_type}\n"
-            context_part += f"Содержание:\n{content}\n"
+            context_part = f"[Document {i}]\n"
+            context_part += f"Paper: {paper_title}\n"
+            context_part += f"Section: {section_id}\n"
+            context_part += f"Content type: {content_type}\n"
+            context_part += f"Content:\n{content}\n"
             
             context_parts.append(context_part)
         
@@ -212,14 +212,14 @@ class RAGSystem:
     
     def ask_question(self, question: str, **kwargs) -> Dict[str, Any]:
         """
-        Основной метод для задавания вопросов RAG-системе
+        Main method for asking questions to RAG system
         """
-        logger.info(f"Обработка вопроса: '{question}'")
+        logger.info(f"Processing question: '{question}'")
         
-        # Генерируем ответ
+        # Generate answer
         result = self.generate_answer(question, **kwargs)
         
-        # Добавляем дополнительную информацию
+        # Add additional information
         result["system_info"] = {
             "collection_name": self.config.COLLECTION_NAME,
             "embedding_model": self.config.EMBEDDING_MODEL,
@@ -230,7 +230,7 @@ class RAGSystem:
     
     def get_system_stats(self) -> Dict[str, Any]:
         """
-        Возвращает статистику системы
+        Returns system statistics
         """
         collection_info = self.vector_store.get_collection_info()
         
@@ -248,8 +248,8 @@ class RAGSystem:
     
     def reset_system(self) -> None:
         """
-        Сбрасывает систему (удаляет векторное хранилище)
+        Resets system (deletes vector storage)
         """
-        logger.info("Сброс RAG-системы...")
+        logger.info("Resetting RAG system...")
         self.vector_store.reset_collection()
-        logger.info("RAG-система сброшена")
+        logger.info("RAG system reset")

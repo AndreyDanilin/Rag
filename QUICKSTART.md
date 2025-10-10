@@ -1,82 +1,82 @@
-# 🚀 Быстрый старт RAG-системы
+# 🚀 RAG System Quick Start
 
-## Установка и запуск за 5 минут
+## Installation and launch in 5 minutes
 
-### 1. Установка зависимостей
+### 1. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. Настройка API ключа (опционально)
+### 2. Configure API key (optional)
 ```bash
-# Создайте файл .env
+# Create .env file
 echo "OPENAI_API_KEY=your_api_key_here" > .env
 ```
 
-### 3. Запуск демонстрации
+### 3. Run demonstration
 ```bash
 python demo.py
 ```
 
-### 4. Интерактивный режим
+### 4. Interactive mode
 ```bash
-# Консольный интерфейс
+# Console interface
 python main.py
 
-# Веб-интерфейс
+# Web interface
 streamlit run app.py
 ```
 
-## 🎯 Что вы увидите
+## 🎯 What you'll see
 
-### Демонстрация (`python demo.py`)
-- ✅ Инициализация системы с примерными данными
-- 🔍 Поиск по документам
-- 💬 Генерация ответов (если настроен API ключ)
-- 🎯 Фильтрация по типам контента
-- 📊 Статистика системы
+### Demonstration (`python demo.py`)
+- ✅ System initialization with sample data
+- 🔍 Document search
+- 💬 Answer generation (if API key is configured)
+- 🎯 Content type filtering
+- 📊 System statistics
 
-### Консольный режим (`python main.py`)
-- Интерактивный чат с системой
-- Поиск релевантных документов
-- Генерация ответов на вопросы
+### Console mode (`python main.py`)
+- Interactive chat with system
+- Relevant document search
+- Answer generation for questions
 
-### Веб-интерфейс (`streamlit run app.py`)
-- Удобный графический интерфейс
-- Настройки поиска
-- Анализ результатов
-- Статистика системы
+### Web interface (`streamlit run app.py`)
+- Convenient graphical interface
+- Search settings
+- Result analysis
+- System statistics
 
-## 📝 Примеры вопросов
+## 📝 Example questions
 
-- "Что такое машинное обучение?"
-- "Какие типы нейронных сетей используются для изображений?"
-- "Объясни концепцию глубокого обучения"
-- "Как работают сверточные нейронные сети?"
+- "What is machine learning?"
+- "What types of neural networks are used for images?"
+- "Explain the concept of deep learning"
+- "How do convolutional neural networks work?"
 
-## ⚙️ Настройка
+## ⚙️ Configuration
 
-Основные параметры в `config.py`:
-- `CHUNK_SIZE`: размер чанков (по умолчанию: 1000)
-- `TOP_K_RESULTS`: количество результатов поиска (по умолчанию: 5)
-- `EMBEDDING_MODEL`: модель эмбеддингов
+Main parameters in `config.py`:
+- `CHUNK_SIZE`: chunk size (default: 1000)
+- `TOP_K_RESULTS`: number of search results (default: 5)
+- `EMBEDDING_MODEL`: embedding model
 
-## 🔧 Устранение неполадок
+## 🔧 Troubleshooting
 
-### Ошибка "OpenAI API ключ не найден"
-- Создайте файл `.env` с вашим API ключом
-- Или установите переменную окружения: `export OPENAI_API_KEY=your_key`
+### Error "OpenAI API key not found"
+- Create `.env` file with your API key
+- Or set environment variable: `export OPENAI_API_KEY=your_key`
 
-### Медленная инициализация
-- Первый запуск загружает модель эмбеддингов (~100MB)
-- Последующие запуски будут быстрее
+### Slow initialization
+- First run downloads embedding model (~100MB)
+- Subsequent runs will be faster
 
-### Недостаточно памяти
-- Уменьшите `CHUNK_SIZE` в `config.py`
-- Используйте меньшую модель эмбеддингов
+### Insufficient memory
+- Reduce `CHUNK_SIZE` in `config.py`
+- Use smaller embedding model
 
-## 📚 Дополнительно
+## 📚 Additional
 
-- [Полная документация](README.md)
-- [Тестирование системы](test_system.py)
-- [Настройка для продакшена](README.md#конфигурация)
+- [Full documentation](README.md)
+- [System testing](test_system.py)
+- [Production setup](README.md#configuration)

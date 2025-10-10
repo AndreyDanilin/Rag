@@ -1,168 +1,168 @@
-# RAG-система на Open RAG Benchmark
+# RAG System on Open RAG Benchmark
 
-Этот проект реализует систему Retrieval-Augmented Generation (RAG) на основе датасета [Open RAG Benchmark](https://github.com/vectara/open-rag-bench) от Vectara.
+This project implements a Retrieval-Augmented Generation (RAG) system based on the [Open RAG Benchmark](https://github.com/vectara/open-rag-bench) dataset from Vectara.
 
-## 🚀 Возможности
+## 🚀 Features
 
-- **Мультимодальная обработка**: Работа с текстом, таблицами и изображениями из научных статей
-- **Векторный поиск**: Использование ChromaDB для эффективного поиска релевантных документов
-- **Генерация ответов**: Интеграция с OpenAI GPT для создания качественных ответов
-- **Web-интерфейс**: Удобный Streamlit интерфейс для взаимодействия с системой
-- **Гибкая конфигурация**: Настройка параметров чанкинга, поиска и моделей
+- **Multimodal Processing**: Working with text, tables, and images from scientific papers
+- **Vector Search**: Using ChromaDB for efficient retrieval of relevant documents
+- **Answer Generation**: Integration with OpenAI GPT for creating high-quality answers
+- **Web Interface**: Convenient Streamlit interface for system interaction
+- **Flexible Configuration**: Configurable chunking, search, and model parameters
 
-## 📋 Требования
+## 📋 Requirements
 
 - Python 3.8+
-- OpenAI API ключ
-- 4GB+ RAM (для работы с эмбеддингами)
+- OpenAI API key
+- 4GB+ RAM (for working with embeddings)
 
-## 🛠️ Установка
+## 🛠️ Installation
 
-1. **Клонируйте репозиторий:**
+1. **Clone the repository:**
 ```bash
 git clone <repository-url>
 cd Rag
 ```
 
-2. **Установите зависимости:**
+2. **Install dependencies:**
 ```bash
 pip install -r requirements.txt
 ```
 
-3. **Настройте переменные окружения:**
+3. **Configure environment variables:**
 ```bash
-# Скопируйте пример конфигурации
+# Copy the configuration example
 cp env_example.txt .env
 
-# Отредактируйте .env файл и добавьте ваш OpenAI API ключ
+# Edit the .env file and add your OpenAI API key
 OPENAI_API_KEY=your_api_key_here
 ```
 
-## 🎯 Использование
+## 🎯 Usage
 
-### Запуск через командную строку
+### Command Line Interface
 
 ```bash
 python main.py
 ```
 
-### Запуск Web-интерфейса
+### Web Interface
 
 ```bash
 streamlit run app.py
 ```
 
-Затем откройте браузер по адресу: http://localhost:8501
+Then open your browser at: http://localhost:8501
 
-## 📁 Структура проекта
+## 📁 Project Structure
 
 ```
-├── config.py              # Конфигурация системы
-├── data_loader.py         # Загрузка данных из Open RAG Benchmark
-├── document_processor.py  # Обработка документов и создание чанков
-├── vector_store.py        # Работа с векторным хранилищем ChromaDB
-├── rag_system.py          # Основной класс RAG-системы
-├── main.py               # Консольный интерфейс
-├── app.py                # Streamlit веб-интерфейс
-├── requirements.txt      # Зависимости Python
-└── README.md            # Документация
+├── config.py              # System configuration
+├── data_loader.py         # Data loading from Open RAG Benchmark
+├── document_processor.py  # Document processing and chunking
+├── vector_store.py        # ChromaDB vector store operations
+├── rag_system.py          # Main RAG system class
+├── main.py               # Console interface
+├── app.py                # Streamlit web interface
+├── requirements.txt      # Python dependencies
+└── README.md            # Documentation
 ```
 
-## ⚙️ Конфигурация
+## ⚙️ Configuration
 
-Основные параметры можно настроить в файле `config.py`:
+Main parameters can be configured in `config.py`:
 
-- `CHUNK_SIZE`: Размер чанков для разбиения документов (по умолчанию: 1000)
-- `CHUNK_OVERLAP`: Перекрытие между чанками (по умолчанию: 200)
-- `TOP_K_RESULTS`: Количество результатов поиска (по умолчанию: 5)
-- `EMBEDDING_MODEL`: Модель для создания эмбеддингов
-- `LLM_MODEL`: Модель для генерации ответов
+- `CHUNK_SIZE`: Chunk size for document splitting (default: 1000)
+- `CHUNK_OVERLAP`: Overlap between chunks (default: 200)
+- `TOP_K_RESULTS`: Number of search results (default: 5)
+- `EMBEDDING_MODEL`: Model for creating embeddings
+- `LLM_MODEL`: Model for answer generation
 
-## 🔧 Компоненты системы
+## 🔧 System Components
 
-### 1. Загрузка данных (`data_loader.py`)
-- Загружает документы из Open RAG Benchmark датасета
-- Поддерживает как реальные данные, так и примеры для демонстрации
-- Обрабатывает JSON формат с мультимодальным контентом
+### 1. Data Loading (`data_loader.py`)
+- Loads documents from Open RAG Benchmark dataset
+- Supports both real data and examples for demonstration
+- Processes JSON format with multimodal content
 
-### 2. Обработка документов (`document_processor.py`)
-- Разбивает документы на чанки с настраиваемыми параметрами
-- Обрабатывает текст, таблицы и изображения отдельно
-- Сохраняет метаданные для каждого чанка
+### 2. Document Processing (`document_processor.py`)
+- Splits documents into chunks with configurable parameters
+- Processes text, tables, and images separately
+- Preserves metadata for each chunk
 
-### 3. Векторное хранилище (`vector_store.py`)
-- Использует ChromaDB для хранения и поиска векторов
-- Поддерживает фильтрацию по типу контента
-- Автоматически создает эмбеддинги с помощью SentenceTransformers
+### 3. Vector Store (`vector_store.py`)
+- Uses ChromaDB for vector storage and search
+- Supports filtering by content type
+- Automatically creates embeddings using SentenceTransformers
 
-### 4. RAG-система (`rag_system.py`)
-- Объединяет все компоненты в единую систему
-- Реализует поиск релевантных документов
-- Генерирует ответы на основе найденного контекста
+### 4. RAG System (`rag_system.py`)
+- Combines all components into a unified system
+- Implements relevant document search
+- Generates answers based on found context
 
-## 📊 Примеры использования
+## 📊 Usage Examples
 
-### Поиск информации о машинном обучении
+### Searching for machine learning information
 ```python
 from rag_system import RAGSystem
 from config import Config
 
-# Инициализация
+# Initialization
 config = Config()
 rag = RAGSystem(config)
 rag.initialize_system()
 
-# Задаем вопрос
-result = rag.ask_question("Что такое машинное обучение?")
+# Ask a question
+result = rag.ask_question("What is machine learning?")
 print(result['answer'])
 ```
 
-### Поиск только в таблицах
+### Searching only in tables
 ```python
-# Поиск с фильтром по типу контента
+# Search with content type filter
 results = rag.search_documents(
-    "статистические данные", 
+    "statistical data", 
     content_type="table"
 )
 ```
 
-## 🎨 Web-интерфейс
+## 🎨 Web Interface
 
-Streamlit интерфейс предоставляет:
+The Streamlit interface provides:
 
-- **Вкладка "Вопросы"**: Интерактивный чат с системой
-- **Вкладка "Поиск"**: Поиск по документам без генерации ответов
-- **Вкладка "Анализ"**: Статистика и анализ системы
-- **Боковая панель**: Настройки и статистика
+- **"Questions" Tab**: Interactive chat with the system
+- **"Search" Tab**: Document search without answer generation
+- **"Analysis" Tab**: System statistics and analysis
+- **Sidebar**: Settings and statistics
 
-## 🔍 Особенности датасета
+## 🔍 Dataset Features
 
-Open RAG Benchmark включает:
-- **1000 PDF статей** из arXiv
-- **3045 вопросов и ответов**
-- **Мультимодальный контент**: текст, таблицы, изображения
-- **Различные типы запросов**: абстрактные и извлекающие
+Open RAG Benchmark includes:
+- **1000 PDF papers** from arXiv
+- **3045 question-answer pairs**
+- **Multimodal content**: text, tables, images
+- **Various query types**: abstractive and extractive
 
-## 🚧 Ограничения
+## 🚧 Limitations
 
-- Требует OpenAI API ключ для генерации ответов
-- Первая инициализация может занять время (загрузка модели эмбеддингов)
-- Размер векторной базы данных растет с количеством документов
+- Requires OpenAI API key for answer generation
+- Initial setup may take time (loading embedding model)
+- Vector database size grows with document count
 
-## 🤝 Вклад в проект
+## 🤝 Contributing
 
-1. Форкните репозиторий
-2. Создайте ветку для новой функции
-3. Внесите изменения
-4. Создайте Pull Request
+1. Fork the repository
+2. Create a branch for new feature
+3. Make changes
+4. Create a Pull Request
 
-## 📄 Лицензия
+## 📄 License
 
-Этот проект использует MIT лицензию.
+This project uses MIT license.
 
-## 🙏 Благодарности
+## 🙏 Acknowledgments
 
-- [Vectara](https://github.com/vectara/open-rag-bench) за создание Open RAG Benchmark датасета
-- [LangChain](https://github.com/langchain-ai/langchain) за фреймворк для RAG
-- [ChromaDB](https://github.com/chroma-core/chroma) за векторное хранилище
-- [Streamlit](https://github.com/streamlit/streamlit) за веб-интерфейс
+- [Vectara](https://github.com/vectara/open-rag-bench) for creating Open RAG Benchmark dataset
+- [LangChain](https://github.com/langchain-ai/langchain) for RAG framework
+- [ChromaDB](https://github.com/chroma-core/chroma) for vector storage
+- [Streamlit](https://github.com/streamlit/streamlit) for web interface

@@ -1,5 +1,5 @@
 """
-Модуль для работы с векторным хранилищем
+Module for working with vector storage
 """
 import os
 from typing import List, Dict, Any, Optional
@@ -12,7 +12,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class VectorStore:
-    """Класс для работы с векторным хранилищем ChromaDB"""
+    """Class for working with ChromaDB vector storage"""
     
     def __init__(self, 
                  collection_name: str = "arxiv_papers",
@@ -23,10 +23,10 @@ class VectorStore:
         self.persist_directory = persist_directory
         self.embedding_model_name = embedding_model
         
-        # Создаем директорию для хранения
+        # Create storage directory
         os.makedirs(persist_directory, exist_ok=True)
         
-        # Инициализируем ChromaDB
+        # Initialize ChromaDB
         self.client = chromadb.PersistentClient(
             path=persist_directory,
             settings=Settings(
@@ -35,20 +35,20 @@ class VectorStore:
             )
         )
         
-        # Загружаем модель эмбеддингов
+        # Load embedding model
         self.embedding_model = SentenceTransformer(embedding_model)
         
-        # Получаем или создаем коллекцию
+        # Get or create collection
         self.collection = self._get_or_create_collection()
     
     def _get_or_create_collection(self):
-        """Получает существующую коллекцию или создает новую"""
+        """Gets existing collection or creates new one"""
         try:
             collection = self.client.get_collection(name=self.collection_name)
-            logger.info(f"Найдена существующая коллекция: {self.collection_name}")
+            logger.info(f"Found existing collection: {self.collection_name}")
             return collection
         except Exception:
-            logger.info(f"Создание новой коллекции: {self.collection_name}")
+            logger.info(f"Creating new collection: {self.collection_name}")
             return self.client.create_collection(
                 name=self.collection_name,
                 metadata={"description": "Open RAG Benchmark papers collection"}
@@ -56,13 +56,13 @@ class VectorStore:
     
     def add_documents(self, documents: List[Document]) -> None:
         """
-        Добавляет документы в векторное хранилище
+        Adds documents to vector storage
         """
         if not documents:
-            logger.warning("Нет документов для добавления")
+            logger.warning("No documents to add")
             return
         
-        # Подготавливаем данные для ChromaDB
+        # Prepare data for ChromaDB
         ids = []
         texts = []
         metadatas = []
@@ -72,7 +72,7 @@ class VectorStore:
             ids.append(chunk_id)
             texts.append(doc.page_content)
             
-            # Очищаем метаданные для ChromaDB (убираем сложные типы)
+            # Clean metadata for ChromaDB (remove complex types)
             clean_metadata = {}
             for key, value in doc.metadata.items():
                 if isinstance(value, (str, int, float, bool)):
@@ -82,16 +82,16 @@ class VectorStore:
             
             metadatas.append(clean_metadata)
         
-        # Добавляем в коллекцию
+        # Add to collection
         try:
             self.collection.add(
                 ids=ids,
                 documents=texts,
                 metadatas=metadatas
             )
-            logger.info(f"Добавлено {len(documents)} документов в коллекцию")
+            logger.info(f"Added {len(documents)} documents to collection")
         except Exception as e:
-            logger.error(f"Ошибка при добавлении документов: {e}")
+            logger.error(f"Error adding documents: {e}")
             raise
     
     def search(self, 
@@ -99,7 +99,7 @@ class VectorStore:
                n_results: int = 5,
                where: Optional[Dict] = None) -> List[Dict[str, Any]]:
         """
-        Выполняет поиск по векторному хранилищу
+        Performs search in vector storage
         """
         try:
             results = self.collection.query(
@@ -108,7 +108,7 @@ class VectorStore:
                 where=where
             )
             
-            # Преобразуем результаты в удобный формат
+            # Convert results to convenient format
             search_results = []
             if results['documents'] and results['documents'][0]:
                 for i in range(len(results['documents'][0])):
@@ -122,12 +122,12 @@ class VectorStore:
             return search_results
             
         except Exception as e:
-            logger.error(f"Ошибка при поиске: {e}")
+            logger.error(f"Search error: {e}")
             return []
     
     def get_collection_info(self) -> Dict[str, Any]:
         """
-        Возвращает информацию о коллекции
+        Returns collection information
         """
         try:
             count = self.collection.count()
@@ -138,30 +138,30 @@ class VectorStore:
                 "persist_directory": self.persist_directory
             }
         except Exception as e:
-            logger.error(f"Ошибка при получении информации о коллекции: {e}")
+            logger.error(f"Error getting collection info: {e}")
             return {}
     
     def delete_collection(self) -> None:
         """
-        Удаляет коллекцию
+        Deletes collection
         """
         try:
             self.client.delete_collection(name=self.collection_name)
-            logger.info(f"Коллекция {self.collection_name} удалена")
+            logger.info(f"Collection {self.collection_name} deleted")
         except Exception as e:
-            logger.error(f"Ошибка при удалении коллекции: {e}")
+            logger.error(f"Error deleting collection: {e}")
     
     def reset_collection(self) -> None:
         """
-        Сбрасывает коллекцию (удаляет и создает заново)
+        Resets collection (deletes and creates new one)
         """
         self.delete_collection()
         self.collection = self._get_or_create_collection()
-        logger.info(f"Коллекция {self.collection_name} сброшена")
+        logger.info(f"Collection {self.collection_name} reset")
     
     def get_documents_by_paper_id(self, paper_id: str) -> List[Dict[str, Any]]:
         """
-        Получает все документы по ID статьи
+        Gets all documents by paper ID
         """
         try:
             results = self.collection.get(
@@ -180,12 +180,12 @@ class VectorStore:
             return documents
             
         except Exception as e:
-            logger.error(f"Ошибка при получении документов по paper_id: {e}")
+            logger.error(f"Error getting documents by paper_id: {e}")
             return []
     
     def get_documents_by_content_type(self, content_type: str) -> List[Dict[str, Any]]:
         """
-        Получает документы по типу контента
+        Gets documents by content type
         """
         try:
             results = self.collection.get(
@@ -204,5 +204,5 @@ class VectorStore:
             return documents
             
         except Exception as e:
-            logger.error(f"Ошибка при получении документов по content_type: {e}")
+            logger.error(f"Error getting documents by content_type: {e}")
             return []

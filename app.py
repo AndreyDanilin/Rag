@@ -1,5 +1,5 @@
 """
-Streamlit интерфейс для RAG-системы
+Streamlit interface for RAG system
 """
 import streamlit as st
 import logging
@@ -9,168 +9,168 @@ import json
 from rag_system import RAGSystem
 from config import Config
 
-# Настройка логирования
+# Logging setup
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Настройка страницы
+# Page setup
 st.set_page_config(
-    page_title="RAG-система на Open RAG Benchmark",
+    page_title="RAG System on Open RAG Benchmark",
     page_icon="📚",
     layout="wide"
 )
 
 @st.cache_resource
 def initialize_rag_system():
-    """Инициализирует RAG-систему с кэшированием"""
+    """Initializes RAG system with caching"""
     config = Config()
     rag_system = RAGSystem(config)
     
-    # Проверяем, есть ли уже данные в векторном хранилище
+    # Check if there's already data in vector storage
     collection_info = rag_system.vector_store.get_collection_info()
     
     if collection_info.get('document_count', 0) == 0:
-        # Инициализируем систему с данными
-        with st.spinner("Инициализация RAG-системы..."):
+        # Initialize system with data
+        with st.spinner("Initializing RAG system..."):
             rag_system.initialize_system()
     
     return rag_system
 
 def display_document_info(doc: Dict[str, Any]):
-    """Отображает информацию о документе"""
+    """Displays document information"""
     metadata = doc.get('metadata', {})
     
     col1, col2 = st.columns([3, 1])
     
     with col1:
-        st.write(f"**Статья:** {metadata.get('title', 'Неизвестная')}")
-        st.write(f"**Авторы:** {metadata.get('authors', 'Неизвестны')}")
-        st.write(f"**Секция:** {metadata.get('section_id', 'N/A')}")
-        st.write(f"**Тип контента:** {metadata.get('content_type', 'text')}")
+        st.write(f"**Paper:** {metadata.get('title', 'Unknown')}")
+        st.write(f"**Authors:** {metadata.get('authors', 'Unknown')}")
+        st.write(f"**Section:** {metadata.get('section_id', 'N/A')}")
+        st.write(f"**Content type:** {metadata.get('content_type', 'text')}")
     
     with col2:
         distance = doc.get('distance')
         if distance is not None:
-            similarity = 1 - distance  # Преобразуем расстояние в схожесть
-            st.metric("Схожесть", f"{similarity:.3f}")
+            similarity = 1 - distance  # Convert distance to similarity
+            st.metric("Similarity", f"{similarity:.3f}")
 
 def main():
-    """Основная функция приложения"""
+    """Main application function"""
     
-    # Заголовок
-    st.title("📚 RAG-система на Open RAG Benchmark")
-    st.markdown("Система поиска и генерации ответов на основе научных статей")
+    # Header
+    st.title("📚 RAG System on Open RAG Benchmark")
+    st.markdown("Search and answer generation system based on scientific papers")
     
-    # Инициализация системы
+    # System initialization
     try:
         rag_system = initialize_rag_system()
     except Exception as e:
-        st.error(f"Ошибка инициализации системы: {e}")
+        st.error(f"System initialization error: {e}")
         return
     
-    # Боковая панель с настройками
+    # Sidebar with settings
     with st.sidebar:
-        st.header("⚙️ Настройки")
+        st.header("⚙️ Settings")
         
-        # Количество результатов
+        # Number of results
         n_results = st.slider(
-            "Количество результатов поиска",
+            "Number of search results",
             min_value=1,
             max_value=10,
             value=5
         )
         
-        # Фильтр по типу контента
+        # Content type filter
         content_type = st.selectbox(
-            "Тип контента",
-            ["Все", "text", "table", "image"],
+            "Content type",
+            ["All", "text", "table", "image"],
             index=0
         )
         
-        if content_type == "Все":
+        if content_type == "All":
             content_type = None
         
-        # Статистика системы
-        st.header("📊 Статистика")
+        # System statistics
+        st.header("📊 Statistics")
         stats = rag_system.get_system_stats()
         
-        st.metric("Документов в БД", stats['vector_store'].get('document_count', 0))
-        st.metric("Модель эмбеддингов", stats['config']['embedding_model'].split('/')[-1])
-        st.metric("LLM модель", stats['config']['llm_model'])
+        st.metric("Documents in DB", stats['vector_store'].get('document_count', 0))
+        st.metric("Embedding model", stats['config']['embedding_model'].split('/')[-1])
+        st.metric("LLM model", stats['config']['llm_model'])
         
-        # Кнопка сброса
-        if st.button("🔄 Сбросить систему"):
-            with st.spinner("Сброс системы..."):
+        # Reset button
+        if st.button("🔄 Reset system"):
+            with st.spinner("Resetting system..."):
                 rag_system.reset_system()
-                st.success("Система сброшена!")
+                st.success("System reset!")
                 st.rerun()
     
-    # Основная область
-    tab1, tab2, tab3 = st.tabs(["💬 Вопросы", "🔍 Поиск", "📈 Анализ"])
+    # Main area
+    tab1, tab2, tab3 = st.tabs(["💬 Questions", "🔍 Search", "📈 Analysis"])
     
     with tab1:
-        st.header("Задайте вопрос системе")
+        st.header("Ask a question to the system")
         
-        # Поле ввода вопроса
+        # Question input field
         question = st.text_area(
-            "Ваш вопрос:",
-            placeholder="Например: Что такое машинное обучение?",
+            "Your question:",
+            placeholder="For example: What is machine learning?",
             height=100
         )
         
-        # Кнопка отправки
-        if st.button("🚀 Получить ответ", type="primary"):
+        # Submit button
+        if st.button("🚀 Get answer", type="primary"):
             if question.strip():
-                with st.spinner("Обработка вопроса..."):
+                with st.spinner("Processing question..."):
                     try:
-                        # Получаем ответ
+                        # Get answer
                         result = rag_system.ask_question(
                             question,
                             n_results=n_results,
                             content_type=content_type
                         )
                         
-                        # Отображаем ответ
-                        st.subheader("💡 Ответ:")
+                        # Display answer
+                        st.subheader("💡 Answer:")
                         st.write(result['answer'])
                         
-                        # Отображаем контекст
+                        # Display context
                         if result.get('context'):
-                            st.subheader("📄 Использованные источники:")
+                            st.subheader("📄 Sources used:")
                             
                             for i, doc in enumerate(result['context'], 1):
-                                with st.expander(f"Источник {i}"):
+                                with st.expander(f"Source {i}"):
                                     display_document_info(doc)
-                                    st.write("**Содержание:**")
+                                    st.write("**Content:**")
                                     st.write(doc['content'])
                         
-                        # Дополнительная информация
-                        with st.expander("ℹ️ Дополнительная информация"):
+                        # Additional information
+                        with st.expander("ℹ️ Additional information"):
                             st.json({
-                                "Длина контекста": result.get('context_length', 0),
-                                "Количество источников": len(result.get('context', [])),
-                                "Модель": result.get('system_info', {}).get('llm_model', 'N/A')
+                                "Context length": result.get('context_length', 0),
+                                "Number of sources": len(result.get('context', [])),
+                                "Model": result.get('system_info', {}).get('llm_model', 'N/A')
                             })
                     
                     except Exception as e:
-                        st.error(f"Ошибка при обработке вопроса: {e}")
+                        st.error(f"Error processing question: {e}")
             else:
-                st.warning("Пожалуйста, введите вопрос")
+                st.warning("Please enter a question")
     
     with tab2:
-        st.header("Поиск по документам")
+        st.header("Document search")
         
-        # Поисковый запрос
+        # Search query
         search_query = st.text_input(
-            "Поисковый запрос:",
-            placeholder="Введите ключевые слова для поиска"
+            "Search query:",
+            placeholder="Enter keywords to search"
         )
         
-        if st.button("🔍 Найти документы"):
+        if st.button("🔍 Find documents"):
             if search_query.strip():
-                with st.spinner("Поиск документов..."):
+                with st.spinner("Searching documents..."):
                     try:
-                        # Выполняем поиск
+                        # Perform search
                         results = rag_system.search_documents(
                             search_query,
                             n_results=n_results,
@@ -178,26 +178,26 @@ def main():
                         )
                         
                         if results:
-                            st.subheader(f"Найдено {len(results)} документов:")
+                            st.subheader(f"Found {len(results)} documents:")
                             
                             for i, doc in enumerate(results, 1):
-                                with st.expander(f"Документ {i}"):
+                                with st.expander(f"Document {i}"):
                                     display_document_info(doc)
-                                    st.write("**Содержание:**")
+                                    st.write("**Content:**")
                                     st.write(doc['content'])
                         else:
-                            st.warning("Документы не найдены")
+                            st.warning("No documents found")
                     
                     except Exception as e:
-                        st.error(f"Ошибка при поиске: {e}")
+                        st.error(f"Search error: {e}")
             else:
-                st.warning("Пожалуйста, введите поисковый запрос")
+                st.warning("Please enter a search query")
     
     with tab3:
-        st.header("Анализ системы")
+        st.header("System analysis")
         
-        # Статистика по типам контента
-        st.subheader("📊 Статистика по типам контента")
+        # Statistics by content type
+        st.subheader("📊 Statistics by content type")
         
         try:
             text_docs = rag_system.vector_store.get_documents_by_content_type("text")
@@ -207,22 +207,22 @@ def main():
             col1, col2, col3 = st.columns(3)
             
             with col1:
-                st.metric("Текстовые чанки", len(text_docs))
+                st.metric("Text chunks", len(text_docs))
             
             with col2:
-                st.metric("Таблицы", len(table_docs))
+                st.metric("Tables", len(table_docs))
             
             with col3:
-                st.metric("Изображения", len(image_docs))
+                st.metric("Images", len(image_docs))
             
-            # Детальная статистика
-            st.subheader("🔍 Детальная информация")
+            # Detailed statistics
+            st.subheader("🔍 Detailed information")
             
             stats = rag_system.get_system_stats()
             st.json(stats)
             
         except Exception as e:
-            st.error(f"Ошибка при получении статистики: {e}")
+            st.error(f"Error getting statistics: {e}")
 
 if __name__ == "__main__":
     main()

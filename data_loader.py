@@ -1,5 +1,5 @@
 """
-Модуль для загрузки и обработки данных из Open RAG Benchmark
+Module for loading and processing data from Open RAG Benchmark
 """
 import json
 import os
@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class OpenRAGDataLoader:
-    """Класс для загрузки данных из Open RAG Benchmark датасета"""
+    """Class for loading data from Open RAG Benchmark dataset"""
     
     def __init__(self, data_dir: str = "data"):
         self.data_dir = Path(data_dir)
@@ -21,18 +21,18 @@ class OpenRAGDataLoader:
         
     def download_dataset(self, huggingface_url: str = None):
         """
-        Загружает датасет с Hugging Face или из локального источника
+        Downloads dataset from Hugging Face or local source
         """
         if huggingface_url:
-            logger.info(f"Загрузка датасета с {huggingface_url}")
-            # Здесь можно добавить код для загрузки с Hugging Face
+            logger.info(f"Downloading dataset from {huggingface_url}")
+            # Code for downloading from Hugging Face can be added here
             pass
         else:
-            logger.info("Используем локальные данные или создаем примеры")
+            logger.info("Using local data or creating examples")
             self._create_sample_data()
     
     def _create_sample_data(self):
-        """Создает примеры данных для демонстрации"""
+        """Creates sample data for demonstration"""
         sample_papers = [
             {
                 "id": "sample_001",
@@ -78,22 +78,22 @@ class OpenRAGDataLoader:
             }
         ]
         
-        # Сохраняем примеры документов
+        # Save sample documents
         for paper in sample_papers:
             paper_path = self.corpus_dir / f"{paper['id']}.json"
             with open(paper_path, 'w', encoding='utf-8') as f:
                 json.dump(paper, f, ensure_ascii=False, indent=2)
         
-        logger.info(f"Создано {len(sample_papers)} примеров документов")
+        logger.info(f"Created {len(sample_papers)} sample documents")
     
     def load_corpus(self) -> List[Dict[str, Any]]:
         """
-        Загружает все документы из корпуса
+        Loads all documents from corpus
         """
         papers = []
         
         if not self.corpus_dir.exists():
-            logger.warning("Папка корпуса не найдена, создаем примеры данных")
+            logger.warning("Corpus directory not found, creating sample data")
             self._create_sample_data()
         
         for paper_file in self.corpus_dir.glob("*.json"):
@@ -102,28 +102,28 @@ class OpenRAGDataLoader:
                     paper = json.load(f)
                     papers.append(paper)
             except Exception as e:
-                logger.error(f"Ошибка при загрузке {paper_file}: {e}")
+                logger.error(f"Error loading {paper_file}: {e}")
         
-        logger.info(f"Загружено {len(papers)} документов")
+        logger.info(f"Loaded {len(papers)} documents")
         return papers
     
     def load_queries(self, queries_path: str = None) -> Dict[str, Any]:
         """
-        Загружает запросы из файла queries.json
+        Loads queries from queries.json file
         """
         if queries_path and os.path.exists(queries_path):
             with open(queries_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         else:
-            # Создаем примеры запросов
+            # Create sample queries
             return {
                 "query_001": {
-                    "query": "Что такое машинное обучение?",
+                    "query": "What is machine learning?",
                     "type": "abstractive",
                     "source": "text"
                 },
                 "query_002": {
-                    "query": "Какие типы нейронных сетей используются для распознавания изображений?",
+                    "query": "What types of neural networks are used for image recognition?",
                     "type": "extractive", 
                     "source": "text"
                 }
@@ -131,13 +131,13 @@ class OpenRAGDataLoader:
     
     def load_qrels(self, qrels_path: str = None) -> Dict[str, Any]:
         """
-        Загружает релевантность запросов к документам
+        Loads query-document relevance
         """
         if qrels_path and os.path.exists(qrels_path):
             with open(qrels_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
         else:
-            # Создаем примеры релевантности
+            # Create sample relevance
             return {
                 "query_001": {
                     "doc_id": "sample_001",

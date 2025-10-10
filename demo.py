@@ -1,5 +1,5 @@
 """
-Демонстрационный скрипт для RAG-системы
+Demonstration script for RAG system
 """
 import os
 import time
@@ -8,125 +8,125 @@ from dotenv import load_dotenv
 from rag_system import RAGSystem
 from config import Config
 
-# Загружаем переменные окружения
+# Load environment variables
 load_dotenv()
 
 def print_separator(title=""):
-    """Печатает разделитель с заголовком"""
+    """Prints separator with title"""
     print("\n" + "=" * 60)
     if title:
         print(f" {title}")
         print("=" * 60)
 
 def demo_rag_system():
-    """Демонстрация возможностей RAG-системы"""
+    """Demonstration of RAG system capabilities"""
     
-    print_separator("🚀 ДЕМОНСТРАЦИЯ RAG-СИСТЕМЫ")
-    print("Система поиска и генерации ответов на основе Open RAG Benchmark")
+    print_separator("🚀 RAG SYSTEM DEMONSTRATION")
+    print("Search and answer generation system based on Open RAG Benchmark")
     
-    # Проверка API ключа
+    # Check API key
     if not os.getenv("OPENAI_API_KEY"):
-        print_separator("⚠️ ВНИМАНИЕ")
-        print("OpenAI API ключ не найден!")
-        print("Для полной демонстрации создайте файл .env с вашим API ключом:")
+        print_separator("⚠️ WARNING")
+        print("OpenAI API key not found!")
+        print("For full demonstration, create .env file with your API key:")
         print("OPENAI_API_KEY=your_api_key_here")
-        print("\nПродолжаем демонстрацию без генерации ответов...")
+        print("\nContinuing demonstration without answer generation...")
     
-    # Инициализация системы
-    print_separator("📚 ИНИЦИАЛИЗАЦИЯ СИСТЕМЫ")
+    # System initialization
+    print_separator("📚 SYSTEM INITIALIZATION")
     config = Config()
     rag_system = RAGSystem(config)
     
-    print("Загрузка и обработка данных...")
+    print("Loading and processing data...")
     start_time = time.time()
     rag_system.initialize_system()
     init_time = time.time() - start_time
     
-    print(f"✅ Система инициализирована за {init_time:.2f} секунд")
+    print(f"✅ System initialized in {init_time:.2f} seconds")
     
-    # Статистика
+    # Statistics
     stats = rag_system.get_system_stats()
-    print(f"📊 Документов в базе: {stats['vector_store'].get('document_count', 0)}")
-    print(f"🤖 Модель эмбеддингов: {stats['config']['embedding_model']}")
-    print(f"🧠 LLM модель: {stats['config']['llm_model']}")
+    print(f"📊 Documents in database: {stats['vector_store'].get('document_count', 0)}")
+    print(f"🤖 Embedding model: {stats['config']['embedding_model']}")
+    print(f"🧠 LLM model: {stats['config']['llm_model']}")
     
-    # Демонстрация поиска
-    print_separator("🔍 ДЕМОНСТРАЦИЯ ПОИСКА")
+    # Search demonstration
+    print_separator("🔍 SEARCH DEMONSTRATION")
     
     demo_queries = [
-        "машинное обучение",
-        "нейронные сети",
-        "глубокое обучение",
-        "распознавание изображений"
+        "machine learning",
+        "neural networks",
+        "deep learning",
+        "image recognition"
     ]
     
     for query in demo_queries:
-        print(f"\n🔎 Поиск: '{query}'")
+        print(f"\n🔎 Search: '{query}'")
         results = rag_system.search_documents(query, n_results=3)
         
         if results:
-            print(f"   Найдено {len(results)} релевантных документов:")
+            print(f"   Found {len(results)} relevant documents:")
             for i, doc in enumerate(results, 1):
                 metadata = doc.get('metadata', {})
-                title = metadata.get('title', 'Неизвестная статья')
+                title = metadata.get('title', 'Unknown paper')
                 content_type = metadata.get('content_type', 'text')
                 distance = doc.get('distance', 0)
                 similarity = 1 - distance if distance else 0
                 
                 print(f"   {i}. {title}")
-                print(f"      Тип: {content_type}, Схожесть: {similarity:.3f}")
+                print(f"      Type: {content_type}, Similarity: {similarity:.3f}")
         else:
-            print("   Документы не найдены")
+            print("   No documents found")
     
-    # Демонстрация генерации ответов
+    # Answer generation demonstration
     if rag_system.llm:
-        print_separator("💬 ДЕМОНСТРАЦИЯ ГЕНЕРАЦИИ ОТВЕТОВ")
+        print_separator("💬 ANSWER GENERATION DEMONSTRATION")
         
         demo_questions = [
-            "Что такое машинное обучение?",
-            "Какие типы нейронных сетей используются для работы с изображениями?"
+            "What is machine learning?",
+            "What types of neural networks are used for working with images?"
         ]
         
         for question in demo_questions:
-            print(f"\n❓ Вопрос: {question}")
-            print("🤔 Генерация ответа...")
+            print(f"\n❓ Question: {question}")
+            print("🤔 Generating answer...")
             
             start_time = time.time()
             result = rag_system.generate_answer(question, n_results=3)
             gen_time = time.time() - start_time
             
             if result.get('error'):
-                print(f"❌ Ошибка: {result['error']}")
+                print(f"❌ Error: {result['error']}")
             else:
-                print(f"💡 Ответ ({gen_time:.2f}с):")
+                print(f"💡 Answer ({gen_time:.2f}s):")
                 print(f"   {result['answer']}")
-                print(f"   📄 Использовано источников: {len(result.get('context', []))}")
+                print(f"   📄 Sources used: {len(result.get('context', []))}")
     else:
-        print_separator("⚠️ ГЕНЕРАЦИЯ ОТВЕТОВ ОТКЛЮЧЕНА")
-        print("Для демонстрации генерации ответов настройте OpenAI API ключ")
+        print_separator("⚠️ ANSWER GENERATION DISABLED")
+        print("To demonstrate answer generation, configure OpenAI API key")
     
-    # Демонстрация фильтрации
-    print_separator("🎯 ДЕМОНСТРАЦИЯ ФИЛЬТРАЦИИ")
+    # Filtering demonstration
+    print_separator("🎯 FILTERING DEMONSTRATION")
     
-    print("🔍 Поиск только в текстовых документах:")
-    text_results = rag_system.search_documents("машинное обучение", content_type="text")
-    print(f"   Найдено текстовых документов: {len(text_results)}")
+    print("🔍 Search only in text documents:")
+    text_results = rag_system.search_documents("machine learning", content_type="text")
+    print(f"   Found text documents: {len(text_results)}")
     
-    print("🔍 Поиск только в таблицах:")
-    table_results = rag_system.search_documents("статистика", content_type="table")
-    print(f"   Найдено таблиц: {len(table_results)}")
+    print("🔍 Search only in tables:")
+    table_results = rag_system.search_documents("statistics", content_type="table")
+    print(f"   Found tables: {len(table_results)}")
     
-    print("🔍 Поиск только в изображениях:")
-    image_results = rag_system.search_documents("диаграмма", content_type="image")
-    print(f"   Найдено изображений: {len(image_results)}")
+    print("🔍 Search only in images:")
+    image_results = rag_system.search_documents("diagram", content_type="image")
+    print(f"   Found images: {len(image_results)}")
     
-    # Заключение
-    print_separator("🎉 ДЕМОНСТРАЦИЯ ЗАВЕРШЕНА")
-    print("RAG-система успешно работает!")
-    print("\nДля интерактивного использования:")
-    print("  • Консольный режим: python main.py")
-    print("  • Веб-интерфейс: streamlit run app.py")
-    print("  • Тестирование: python test_system.py")
+    # Conclusion
+    print_separator("🎉 DEMONSTRATION COMPLETED")
+    print("RAG system is working successfully!")
+    print("\nFor interactive use:")
+    print("  • Console mode: python main.py")
+    print("  • Web interface: streamlit run app.py")
+    print("  • Testing: python test_system.py")
 
 if __name__ == "__main__":
     demo_rag_system()
