@@ -1,0 +1,10 @@
+# Пример файла конфигурации
+# Скопируйте этот файл в .env и заполните ваши данные
+
+# OpenAI API ключ (обязательно для работы с GPT моделями)
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Опциональные настройки
+# CHUNK_SIZE=1000
+# CHUNK_OVERLAP=200
+# TOP_K_RESULTS=5
