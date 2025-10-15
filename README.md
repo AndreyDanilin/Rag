@@ -149,12 +149,6 @@ Open RAG Benchmark includes:
 - Initial setup may take time (loading embedding model)
 - Vector database size grows with document count
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a branch for new feature
-3. Make changes
-4. Create a Pull Request
 
 ## 📄 License
 
