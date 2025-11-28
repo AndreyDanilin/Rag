@@ -1,168 +1,76 @@
-# RAG System on Open RAG Benchmark
+# RAG Agent with LlamaIndex & LangChain
 
-This project implements a Retrieval-Augmented Generation (RAG) system based on the [Open RAG Benchmark](https://github.com/vectara/open-rag-bench) dataset from Vectara.
+A modern Retrieval Augmented Generation (RAG) agent using LlamaIndex for vector storage and retrieval, and LangChain for agent orchestration and tool support.
 
-## 🚀 Features
+## Features
+- Fast retrieval with LlamaIndex and OpenAI embeddings
+- Agent-style answers powered by LangChain with tool calling
+- Pluggable LLMs (OpenAI or your own)
+- Easy CLI and testable interface
+- Extensible with additional tools (e.g. search_web)
 
-- **Multimodal Processing**: Working with text, tables, and images from scientific papers
-- **Vector Search**: Using ChromaDB for efficient retrieval of relevant documents
-- **Answer Generation**: Integration with OpenAI GPT for creating high-quality answers
-- **Web Interface**: Convenient Streamlit interface for system interaction
-- **Flexible Configuration**: Configurable chunking, search, and model parameters
+## Usage
 
-## 📋 Requirements
-
-- Python 3.8+
-- OpenAI API key
-- 4GB+ RAM (for working with embeddings)
-
-## 🛠️ Installation
-
-1. **Clone the repository:**
+### 1. Install requirements (Python 3.9+)
 ```bash
-git clone <repository-url>
-cd Rag
+pip install llama-index langchain-openai openai pytest
 ```
 
-2. **Install dependencies:**
+### 2. Prepare your document corpus
+- Place your `.txt` or `.md` files in `./data/corpus/`
+
+### 3. Configure your API keys and options
+Edit (or copy) `env_example.txt` to `.env`, add your OpenAI API key.
+
+### 4. Build or rebuild the index
+The agent auto-builds on first query. To force rebuild, run in CLI:
 ```bash
-pip install -r requirements.txt
+python main.py
+# then type: rebuild
 ```
 
-3. **Configure environment variables:**
-```bash
-# Copy the configuration example
-cp env_example.txt .env
-
-# Edit the .env file and add your OpenAI API key
-OPENAI_API_KEY=your_api_key_here
-```
-
-## 🎯 Usage
-
-### Command Line Interface
-
+### 5. Ask questions!
+Run the CLI:
 ```bash
 python main.py
 ```
 
-### Web Interface
+### 6. Run tests
+```bash
+pytest
+```
+
+## Docker
+
+You can run this RAG agent fully containerized:
 
 ```bash
-streamlit run app.py
+docker build -t rag-agent .
+docker run -it --rm \
+  -e OPENAI_API_KEY=sk-... \
+  -v $PWD/data/corpus:/app/data/corpus \
+  rag-agent
+```
+- Place your documents in `./data/corpus` (will be mounted from host).
+- To rebuild index or use commands, interact with the CLI in docker: `docker exec -it ... bash` or pass `CMD ["python", "main.py"]` as override.
+- Run tests in container:
+```bash
+docker run --rm -e OPENAI_API_KEY=sk-... rag-agent pytest
 ```
 
-Then open your browser at: http://localhost:8501
+## Agent Tools
+- **rag_search**: Retrieves relevant context from your documents via LlamaIndex.
+- **search_web**: (Stub, for demonstration) A placeholder for a tool to extend your agent (web calls, APIs, etc).
 
-## 📁 Project Structure
+## Example Queries
+- What is machine learning?
+- Summarize the contents of [document_name].
+- Which document explains neural networks?
 
-```
-├── config.py              # System configuration
-├── data_loader.py         # Data loading from Open RAG Benchmark
-├── document_processor.py  # Document processing and chunking
-├── vector_store.py        # ChromaDB vector store operations
-├── rag_system.py          # Main RAG system class
-├── main.py               # Console interface
-├── app.py                # Streamlit web interface
-├── requirements.txt      # Python dependencies
-└── README.md            # Documentation
-```
+## Extending
+- Add new tools to the agent (see `rag_agent.py`, add more LangChain Tools)
+- Swap LLM in config (OpenAI, or other if supported)
+- Automate corpus ingestion (or integrate with pipelines)
 
-## ⚙️ Configuration
-
-Main parameters can be configured in `config.py`:
-
-- `CHUNK_SIZE`: Chunk size for document splitting (default: 1000)
-- `CHUNK_OVERLAP`: Overlap between chunks (default: 200)
-- `TOP_K_RESULTS`: Number of search results (default: 5)
-- `EMBEDDING_MODEL`: Model for creating embeddings
-- `LLM_MODEL`: Model for answer generation
-
-## 🔧 System Components
-
-### 1. Data Loading (`data_loader.py`)
-- Loads documents from Open RAG Benchmark dataset
-- Supports both real data and examples for demonstration
-- Processes JSON format with multimodal content
-
-### 2. Document Processing (`document_processor.py`)
-- Splits documents into chunks with configurable parameters
-- Processes text, tables, and images separately
-- Preserves metadata for each chunk
-
-### 3. Vector Store (`vector_store.py`)
-- Uses ChromaDB for vector storage and search
-- Supports filtering by content type
-- Automatically creates embeddings using SentenceTransformers
-
-### 4. RAG System (`rag_system.py`)
-- Combines all components into a unified system
-- Implements relevant document search
-- Generates answers based on found context
-
-## 📊 Usage Examples
-
-### Searching for machine learning information
-```python
-from rag_system import RAGSystem
-from config import Config
-
-# Initialization
-config = Config()
-rag = RAGSystem(config)
-rag.initialize_system()
-
-# Ask a question
-result = rag.ask_question("What is machine learning?")
-print(result['answer'])
-```
-
-### Searching only in tables
-```python
-# Search with content type filter
-results = rag.search_documents(
-    "statistical data", 
-    content_type="table"
-)
-```
-
-## 🎨 Web Interface
-
-The Streamlit interface provides:
-
-- **"Questions" Tab**: Interactive chat with the system
-- **"Search" Tab**: Document search without answer generation
-- **"Analysis" Tab**: System statistics and analysis
-- **Sidebar**: Settings and statistics
-
-## 🔍 Dataset Features
-
-Open RAG Benchmark includes:
-- **1000 PDF papers** from arXiv
-- **3045 question-answer pairs**
-- **Multimodal content**: text, tables, images
-- **Various query types**: abstractive and extractive
-
-## 🚧 Limitations
-
-- Requires OpenAI API key for answer generation
-- Initial setup may take time (loading embedding model)
-- Vector database size grows with document count
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a branch for new feature
-3. Make changes
-4. Create a Pull Request
-
-## 📄 License
-
-This project uses MIT license.
-
-## 🙏 Acknowledgments
-
-- [Vectara](https://github.com/vectara/open-rag-bench) for creating Open RAG Benchmark dataset
-- [LangChain](https://github.com/langchain-ai/langchain) for RAG framework
-- [ChromaDB](https://github.com/chroma-core/chroma) for vector storage
-- [Streamlit](https://github.com/streamlit/streamlit) for web interface
+---
+MIT License. 2025
