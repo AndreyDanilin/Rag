@@ -9,11 +9,13 @@ class Config:
     # LLM (OpenAI or local)
     LLM_MODEL = os.environ.get("LLM_MODEL", "gpt-3.5-turbo")
     OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", None)
-
     # Persistent index path for LlamaIndex
     INDEX_PATH = os.environ.get("INDEX_PATH", "./data/index")
     # Directory with documents/corpus
     CORPUS_PATH = os.environ.get("CORPUS_PATH", "./data/corpus")
     # Maximum number of retrieved results
-    TOP_K = int(os.environ.get("TOP_K", 4))
-    # Other parameters can be added as needed
+    TOP_K = int(os.environ.get("TOP_K", 8))
+    # Reranker config
+    RERANKER_TYPE = os.environ.get("RERANKER_TYPE", "bge") # 'bge' | 'openai' | 'none'
+    K_RERANK_TOP = int(os.environ.get("K_RERANK_TOP", 4)) # how many (top-K) docs to keep after rerank
+    # (Optional: add rerank model path/api-key in env if needed)

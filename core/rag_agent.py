@@ -1,8 +1,9 @@
 """
-RAG agent with LlamaIndex storage and LangChain agent logic
+RAG agent with LlamaIndex storage and LangChain agent logic, now with RERANK support
 """
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex, StorageContext, load_index_from_storage
 from llama_index.embeddings.openai import OpenAIEmbedding
+from llama_index.postprocessor import BgeRerank # add more rerankers here if needed
 from langchain_openai import ChatOpenAI
 from langchain.agents import Tool, AgentExecutor, create_openai_functions_agent
 from core.config import Config
@@ -18,6 +19,7 @@ class RAGAgent:
         )
         self.embedding = OpenAIEmbedding(model=self.config.EMBEDDING_MODEL)
         self.index = self._load_or_build_index()
+        self.reranker = self._build_reranker()
 
         self.rag_tool = Tool(
             name="rag_search",
@@ -35,12 +37,19 @@ class RAGAgent:
             verbose=True
         )
 
+    def _build_reranker(self):
+        """Return rerank postprocessor according to config. Extend for more rerankers."""
+        if self.config.RERANKER_TYPE == "bge":
+            # BGE reranker: small, fast, local, good results (pip install 'llama-index-embeddings-huggingface[rerank]')
+            return BgeRerank(top_n=self.config.K_RERANK_TOP)
+        # TODO: elif self.config.RERANKER_TYPE == "openai": ...
+        # fallback: no rerank
+        return None
+
     def _load_or_build_index(self):
         index_path = self.config.INDEX_PATH
-        # Try load
         if os.path.exists(index_path):
             return load_index_from_storage(StorageContext.from_defaults(persist_dir=index_path))
-        # Build new
         docs = SimpleDirectoryReader(self.config.CORPUS_PATH).load_data()
         index = VectorStoreIndex.from_documents(docs, embed_model=self.embedding)
         index.storage_context.persist(index_path)
@@ -56,9 +65,14 @@ class RAGAgent:
     def _context_search(self, query: str, top_k: int=None) -> str:
         retriever = self.index.as_retriever(similarity_top_k=top_k or self.config.TOP_K)
         nodes = retriever.retrieve(query)
+        # Apply reranker if set
+        if self.reranker is not None and nodes:
+            reranked = self.reranker.postprocess_nodes(nodes, query=query)
+            nodes = reranked or nodes # fallback to old nodes if reranked is None
         if not nodes:
             return "No documents found."
-        return "\n".join(n.get_content() for n in nodes)
+        output = "\n".join(n.get_content() for n in nodes)
+        return output
 
     def answer(self, question: str) -> str:
         # LangChain agent call with given tools (RAG + web-search)
